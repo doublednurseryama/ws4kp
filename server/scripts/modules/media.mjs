@@ -84,7 +84,27 @@ const getMedia = async () => {
 		console.log(`No music files found ${playlistSource}`);
 	}
 
+	await configureNurseryPlaylists();
 	enableMediaPlayer();
+};
+
+// Staff chooses one active site playlist; visitors only control mute/volume.
+const configureNurseryPlaylists = async () => {
+ const endpoint = new URLSearchParams(window.location.search).get('ddn_music');
+ if (!endpoint) return;
+ try {
+  const url = new URL(endpoint, window.location.href);
+  if (url.origin !== window.location.origin) return;
+  const response = await fetch(url.href, { credentials: 'same-origin' });
+  if (!response.ok) return;
+  const config = await response.json();
+  if (config.useBuiltin === true) return;
+  if (!Array.isArray(config.availableFiles)) return;
+  const tracks = config.availableFiles.filter((track) => {
+   try { const audio = new URL(track); return audio.origin === window.location.origin && ['http:', 'https:'].includes(audio.protocol); } catch (_error) { return false; }
+  });
+  playlist = { availableFiles: tracks };
+ } catch (_error) { /* Retain the built-in collection on configuration failure. */ }
 };
 
 const enableMediaPlayer = () => {
@@ -295,7 +315,7 @@ const playerEnded = () => {
 	setTrackName(playlist.availableFiles[currentTrack]);
 };
 
-const musicSource = (fileName) => (fileName.startsWith('https://raw.githubusercontent.com/doublednurseryama/ws4kp-music/') ? fileName : `music/${fileName}`);
+const musicSource = (fileName) => (/^https?:\/\//i.test(fileName) ? fileName : `music/${fileName}`);
 
 const setTrackName = (fileName) => {
 	const baseName = fileName.split('/').pop();
@@ -309,3 +329,4 @@ export {
 	// eslint-disable-next-line import/prefer-default-export
 	handleClick,
 };
+
