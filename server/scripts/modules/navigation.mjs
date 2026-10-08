@@ -577,7 +577,7 @@ const resize = (force = false) => {
 		// Set positioning values for CSS-based centering
 		transformOrigin = 'center center'; // Scale from center point
 		leftPosition = '50%'; // Position at 50% from left
-		topPosition = '50%'; // Position at 50% from top
+		topPosition = `${viewportHeight / 2}px`; // Center above the sound controls
 		marginLeft = `-${wrapperWidth / 2}px`; // Pull back by half width
 		marginTop = `-${wrapperHeight / 2}px`; // Pull back by half height
 	}
