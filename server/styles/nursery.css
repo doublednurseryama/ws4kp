@@ -1,0 +1,7 @@
+.ddn-weather-brand { color: #fff; background: #244b3b; padding: .65rem 1rem; text-align: center; font: 600 16px/1.4 system-ui, sans-serif; }
+.ddn-weather-brand span { display: inline-block; margin-left: .75rem; font-weight: 400; }
+body.kiosk .ddn-weather-brand { display: none; }
+@media (max-width: 480px) { .ddn-weather-brand span { display: block; margin-left: 0; font-size: 14px; } }
+
+.weather-display .header .logo { top: 25px; left: 34px; width: 146px; height: 80px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 5px; padding: 4px; box-sizing: border-box; }
+.weather-display .header .logo img { width: 100%; height: 100%; object-fit: contain; }

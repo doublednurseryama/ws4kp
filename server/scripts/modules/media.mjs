@@ -267,7 +267,7 @@ const initializePlayer = () => {
 	player.addEventListener('ended', playerEnded);
 
 	// get the first file
-	player.src = `music/${playlist.availableFiles[currentTrack]}`;
+	player.src = musicSource(playlist.availableFiles[currentTrack]);
 	setTrackName(playlist.availableFiles[currentTrack]);
 	player.type = 'audio/mpeg';
 	// set volume and slider indicator
@@ -291,16 +291,18 @@ const playerEnded = () => {
 		currentTrack = 0;
 	}
 	// update the player source
-	player.src = `music/${playlist.availableFiles[currentTrack]}`;
+	player.src = musicSource(playlist.availableFiles[currentTrack]);
 	setTrackName(playlist.availableFiles[currentTrack]);
 };
+
+const musicSource = (fileName) => (fileName.startsWith('https://raw.githubusercontent.com/doublednurseryama/ws4kp-music/') ? fileName : `music/${fileName}`);
 
 const setTrackName = (fileName) => {
 	const baseName = fileName.split('/').pop();
 	const trackName = decodeURIComponent(
 		baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, ''),
 	);
-	document.getElementById('musicTrack').innerHTML = trackName;
+	document.getElementById('musicTrack').textContent = trackName;
 };
 
 export {

@@ -168,6 +168,8 @@ const compressHtml = async () => {
 const otherFiles = [
 	'server/robots.txt',
 	'server/manifest.json',
+	'server/scripts/nursery-defaults.js',
+	'server/styles/nursery.css',
 	'server/music/**/*.mp3',
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
