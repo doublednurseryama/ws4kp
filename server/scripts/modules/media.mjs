@@ -95,7 +95,7 @@ const configureNurseryPlaylists = async () => {
  try {
   const url = new URL(endpoint, window.location.href);
   if (url.origin !== window.location.origin) return;
-  const response = await fetch(url.href, { credentials: 'same-origin' });
+  const response = await fetch(url.href, { credentials: 'same-origin', cache: 'no-store' });
   if (!response.ok) return;
   const config = await response.json();
   if (config.useBuiltin === true) return;
