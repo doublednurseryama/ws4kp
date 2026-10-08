@@ -418,10 +418,11 @@ const resize = (force = false) => {
 	const isKioskMode = settings.kiosk?.value || false;
 	const isMobileSafariKiosk = isIOS() && isKioskMode;	// Detect Mobile Safari in kiosk mode (regardless of standalone status)
 	const targetWidth = BASE_SIZE.width;
+	const viewportHeight = window.innerHeight - ((isFullscreen || isKioskMode) ? (document.querySelector('.ddn-audio-controls')?.offsetHeight || 0) : 0);
 
 	// Use window width instead of bottom container width to avoid zero-dimension issues
 	const widthZoomPercent = window.innerWidth / targetWidth;
-	const heightZoomPercent = window.innerHeight / BASE_SIZE.height;
+	const heightZoomPercent = viewportHeight / BASE_SIZE.height;
 
 	// Standard scaling: fit within both dimensions
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
@@ -430,7 +431,7 @@ const resize = (force = false) => {
 	const isKioskLike = isFullscreen || isKioskMode || isMobileSafariKiosk;
 
 	if (debugFlag('resize') || debugFlag('fullscreen')) {
-		console.log(`🖥️ Resize: force=${force} isKioskLike=${isKioskLike} window=${window.innerWidth}x${window.innerHeight} targetWidth=${targetWidth} widthZoom=${widthZoomPercent.toFixed(3)} heightZoom=${heightZoomPercent.toFixed(3)} finalScale=${scale.toFixed(3)} fullscreenElement=${!!document.fullscreenElement} isIOS=${isIOS()} standalone=${window.navigator.standalone} isMobileSafariKiosk=${isMobileSafariKiosk} kioskMode=${settings.kiosk?.value} wideMode=${settings.wide.value}`);
+		console.log(`🖥️ Resize: force=${force} isKioskLike=${isKioskLike} window=${window.innerWidth}x${viewportHeight} targetWidth=${targetWidth} widthZoom=${widthZoomPercent.toFixed(3)} heightZoom=${heightZoomPercent.toFixed(3)} finalScale=${scale.toFixed(3)} fullscreenElement=${!!document.fullscreenElement} isIOS=${isIOS()} standalone=${window.navigator.standalone} isMobileSafariKiosk=${isMobileSafariKiosk} kioskMode=${settings.kiosk?.value} wideMode=${settings.wide.value}`);
 	}
 
 	// Prevent zero or negative scale values
@@ -534,13 +535,13 @@ const resize = (force = false) => {
 		const scaledHeight = wrapperHeight * scale;
 
 		// Determine if we're in portrait or landscape
-		const isPortrait = window.innerHeight > window.innerWidth;
+		const isPortrait = viewportHeight > window.innerWidth;
 
 		let offsetX = 0;
 		let offsetY = 0;
 
 		if (isPortrait) {
-			offsetY = (window.innerHeight - scaledHeight) / 2; // center vertically, align to left edge
+			offsetY = (viewportHeight - scaledHeight) / 2; // center vertically, align to left edge
 		} else {
 			offsetX = (window.innerWidth - scaledWidth) / 2; // center horizontally, align to top edge
 		}
@@ -567,7 +568,7 @@ const resize = (force = false) => {
 		const scaledWidth = wrapperWidth * scale;
 		const scaledHeight = wrapperHeight * scale;
 		const offsetX = (window.innerWidth - scaledWidth) / 2;
-		const offsetY = (window.innerHeight - scaledHeight) / 2;
+		const offsetY = (viewportHeight - scaledHeight) / 2;
 
 		if (debugFlag('fullscreen')) {
 			console.log(`🖥️ Applying fullscreen/kiosk scaling: wrapper=${wrapperWidth}x${wrapperHeight} scale=${scale.toFixed(3)} offset=${offsetX.toFixed(1)},${offsetY.toFixed(1)} target=${isFullscreen ? '#container' : '#divTwcMain'}`);

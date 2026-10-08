@@ -8,6 +8,9 @@ let player;
 let sliderTimeout = null;
 let volumeSlider = null;
 let volumeSliderInput = null;
+let soundButton;
+let soundVolume;
+let soundStatus;
 
 const mediaPlaying = new Setting('mediaPlaying', {
 	name: 'Media Playing',
@@ -31,6 +34,24 @@ document.addEventListener('DOMContentLoaded', () => {
 	// add listener for mute (pause) button under the volume slider
 	volumeSlider.querySelector('img').addEventListener('click', stopMedia);
 
+	// Accessible sound controls remain visible in kiosk and fullscreen modes.
+	const controls = document.createElement('div');
+	controls.className = 'ddn-audio-controls';
+	controls.innerHTML = '<button type="button" id="ddn-sound-toggle" disabled aria-pressed="false">Turn sound on</button><label>Volume <input id="ddn-sound-volume" type="range" min="1" max="100" value="75"></label><span id="ddn-sound-status" role="status">Loading music…</span>';
+	document.getElementById('divTwc').append(controls);
+	soundButton = document.getElementById('ddn-sound-toggle');
+	soundVolume = document.getElementById('ddn-sound-volume');
+	soundStatus = document.getElementById('ddn-sound-status');
+	soundVolume.value = Math.round(mediaVolume.value * 100);
+	soundButton.addEventListener('click', () => {
+		mediaPlaying.value = !mediaPlaying.value;
+		stateChanged();
+	});
+	soundVolume.addEventListener('input', () => {
+		mediaVolume.value = Number(soundVolume.value) / 100;
+		volumeSliderInput.value = soundVolume.value;
+	});
+	window.dispatchEvent(new Event('resize'));
 	// get the playlist
 	getMedia();
 });
@@ -110,6 +131,8 @@ const configureNurseryPlaylists = async () => {
 const enableMediaPlayer = () => {
 	// see if files are available
 	if (playlist?.availableFiles?.length > 0) {
+		if (soundButton) soundButton.disabled = false;
+		if (soundStatus) soundStatus.textContent = 'Sound is off';
 		// randomize the list
 		randomizePlaylist();
 		// enable the icon
@@ -121,10 +144,15 @@ const enableMediaPlayer = () => {
 		if (mediaPlaying.value === true) {
 			startMedia();
 		}
-	}
+	} else if (soundStatus) { soundStatus.textContent = 'No music in the active playlist'; }
 };
 
 const setIcon = () => {
+	if (soundButton) {
+		soundButton.textContent = mediaPlaying.value ? 'Mute sound' : 'Turn sound on';
+		soundButton.setAttribute('aria-pressed', String(mediaPlaying.value));
+	}
+	if (soundStatus) soundStatus.textContent = mediaPlaying.value ? 'Starting music…' : 'Sound is off';
 	// get the icon
 	const icon = document.getElementById('ToggleMediaContainer');
 	if (mediaPlaying.value === true) {
@@ -183,29 +211,25 @@ const hideVolumeSlider = () => {
 };
 
 const startMedia = async () => {
-	// if there's not media player yet, enable it
-	if (!player) {
-		initializePlayer();
-	} else {
-		try {
-			await player.play();
-			setTrackName(playlist.availableFiles[currentTrack]);
-		} catch (e) {
-			// report the error
-			console.error('Couldn\'t play music');
-			console.error(e);
-			// set state back to not playing for good UI experience
-			mediaPlaying.value = false;
-			stateChanged();
-			setTrackName('Not playing');
-		}
+	try {
+		if (!player) initializePlayer();
+		// Call play during the button gesture, including the first click.
+		await player.play();
+		if (!mediaPlaying.value) { player.pause(); return; }
+		setTrackName(playlist.availableFiles[currentTrack]);
+		if (soundStatus) soundStatus.textContent = 'Music playing';
+	} catch (e) {
+		console.error("Couldn't play music", e);
+		mediaPlaying.value = false;
+		setIcon();
+		setTrackName('Not playing');
+		if (soundStatus) soundStatus.textContent = 'Unable to play music. Press Turn sound on to retry.';
 	}
 };
 
 const stopMedia = () => {
 	hideVolumeSlider();
-	if (!player) return;
-	player.pause();
+	if (player) player.pause();
 	mediaPlaying.value = false;
 	setTrackName('Not playing');
 	setIcon();
@@ -237,6 +261,7 @@ const randomizePlaylist = () => {
 };
 
 const setVolume = (newVolume) => {
+	if (soundVolume) soundVolume.value = Math.round(newVolume * 100);
 	if (player) {
 		player.volume = newVolume;
 	}
