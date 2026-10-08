@@ -1,3 +1,11 @@
+## Double D Nursery integration — October 8, 2026
+
+Nursery customization source is on [nursery-customization](https://github.com/doublednurseryama/ws4kp/tree/nursery-customization). WordPress packaging, location/kiosk controls, local logo and staff-only playlists are maintained in [weather](https://github.com/doublednurseryama/weather).
+
+Weather integration **0.2.2 is live and working on 8081**, confirmed by Sam. It fixes coordinate URL encoding in the WordPress integration; this is not a new upstream simulator release. The integration's source-lock.json records the exact simulator/music commits used by a package. Documentation commits do not change that reviewed source pin.
+
+Staff choose the active music in Settings > Nursery Weather; visitors only control sound/volume and start muted. Closure notices and customer email are planned separately in [weather-alerts](https://github.com/doublednurseryama/weather-alerts/blob/main/docs/WEATHER-ALERTS-PLAN.md). The upstream instructions below describe generic simulator deployment; they do not require restoring the retired nursery WordPress 8080 project.
+
 ![Weatherstar 4000+ Current Conditions](https://github.com/netbymatt/ws4kp/blob/main/server/images/social/1200x600.png)
 
 # WeatherStar 4000+
