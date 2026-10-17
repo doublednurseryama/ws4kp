@@ -4,7 +4,8 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import { safeText } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
-import * as utils from './radar-utils.mjs';
+import { radarViewport } from './radar-viewport.mjs';
+import { RADAR_FINAL_SIZE } from './radar-constants.mjs';
 import setTiles from './radar-tiles.mjs';
 import processRadar from './radar-processor.mjs';
 
@@ -128,16 +129,15 @@ class Radar extends WeatherDisplay {
 		const urls = sortedPngs.slice(-(this.dopplerRadarImageMax));
 
 		// calculate offsets and sizes
-		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters);
-		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(this.weatherParameters);
+		const viewport = radarViewport(this.weatherParameters, RADAR_FINAL_SIZE());
 
 		// set up the base map and overlay tiles
 		setTiles({
-			sourceXY,
+			viewport,
 			elemId: this.elemId,
 		});
 
-		const radarKey = `${radarSourceXY.x.toFixed(0)}-${radarSourceXY.y.toFixed(0)}`;
+		const radarKey = JSON.stringify(viewport);
 
 		// reset the "used" flag on pre-processed radars
 		// items that were not used during this process are deleted (either expired via time or change of location)
@@ -159,7 +159,7 @@ class Radar extends WeatherDisplay {
 					url,
 					RADAR_HOST,
 					OVERRIDES,
-					radarSourceXY,
+					viewport,
 				});
 
 				// store the radar
@@ -230,3 +230,4 @@ class Radar extends WeatherDisplay {
 
 // register display
 registerDisplay(new Radar(11, 'radar'));
+
